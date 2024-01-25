@@ -1,7 +1,7 @@
 module.exports.config = {
   name: "unsend",
   version: "1.0.1",
-  hasPermssion: 0,
+  hasPermssion: 1,
   credits: "Mirai Team",
   description: "Unsend bot's messages",
     usePrefix: true,
