@@ -4,6 +4,7 @@ module.exports.config = {
     hasPermssion: 1,
     credits: "Jonell Magallanes",
     description: "",
+    usePrefix: true,
     commandCategory: "Risk",
     usages: "[on/off]",
     cooldowns: 60
