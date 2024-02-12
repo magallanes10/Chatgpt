@@ -6,10 +6,6 @@ const path = require('path');
 const axios = require("axios");
 const app = express();
 
-setInterval(() => {
-  ping(`https://symmetrical-space-disco-7qqr95rrxqrfr6gv.github.dev/pf-signin?id=puzzled-hill-0jqv5pn&cluster=asse&name=symmetrical-space-disco-7qqr95rrxqrfr6gv&port=8080&pb=https%3A%2F%2Fsymmetrical-space-disco-7qqr95rrxqrfr6gv-8080.app.github.dev%2Fauth%2Fpostback%2Ftunnel%3Ftunnel%3D1&cid=1416fadb-5ede-497b-8852-81a221ce80f4`);
-}, 30000); 
-
 const config = require('./config.json'); 
 const commandsPath = './script/commands'; 
 const eventsPath = './script/events'; 
@@ -111,7 +107,7 @@ function startBot() {
 
 startBot(); 
 
-const port = process.env.PORT || 3580;
+const port = process.env.PORT || 5050;
 httpServer.listen(port, () => {
   console.log(`Server with real-time updates running on http://localhost:${port}`);
 });
