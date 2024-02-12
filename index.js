@@ -169,7 +169,7 @@ function startBot() {
 
 startBot(); 
 
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 3580;
 httpServer.listen(port, () => {
   console.log(`Server with real-time updates running on http://localhost:${port}`);
 });
