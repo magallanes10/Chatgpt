@@ -41,10 +41,10 @@ async function getBotInformation() {
   };
 }
 
-function sendLiveData(socket) {
+function sendLiveData() {
   setInterval(() => {
     const uptime = Date.now() - botStartTime;
-    socket.emit('real-time-data', { uptime });
+    // Modify or use your own logic for real-time data updates
   }, 1000); 
 }
 
@@ -72,20 +72,6 @@ app.get('/dashboard', async (req, res) => {
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'harold.html')));
 
-const http = require('http');
-const { Server } = require("socket.io");
-const httpServer = http.createServer(app);
-const io = new Server(httpServer);
-
-io.on('connection', (socket) => {
-  console.log('New client connected');
-  sendLiveData(socket);
-
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
-  });
-});
-
 function startBot() {
   const child = spawn("node", ["--trace-warnings", "--async-stack-traces", "jonell.js"], {
     cwd: __dirname,
@@ -105,13 +91,15 @@ function startBot() {
   });
 }
 
+sendLiveData();  // Call the function to start sending live data
+
 startBot(); 
 
 const port = process.env.PORT || 5050;
-httpServer.listen(port, () => {
-  console.log(`Server with real-time updates running on http://localhost:${port}`);
+app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
 });
 
 module.exports = app;
 
-//Modified by Jonell Magallanes
+// Modified by Jonell Magallanes
