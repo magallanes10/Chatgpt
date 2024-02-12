@@ -1,4 +1,3 @@
-//* Don't change this code if not destroy your files and don't steal it the code (by jonell Magallanes Project CC))
 const express = require('express');
 const fs = require('fs');
 const { spawn } = require("child_process");
@@ -6,62 +5,12 @@ const chalk = require('chalk');
 const path = require('path');
 const axios = require("axios");
 const app = express();
-const PingMonitor = require('ping-monitor');
-const pingOptions = {
-  website: `https://symmetrical-space-disco-7qqr95rrxqrfr6gv.github.dev/pf-signin?id=puzzled-hill-0jqv5pn&cluster=asse&name=symmetrical-space-disco-7qqr95rrxqrfr6gv&port=8080&pb=https%3A%2F%2Fsymmetrical-space-disco-7qqr95rrxqrfr6gv-8080.app.github.dev%2Fauth%2Fpostback%2Ftunnel%3Ftunnel%3D1&cid=1416fadb-5ede-497b-8852-81a221ce80f4`,
-  title: 'EDUCATIONAL BOT 4.0V',
-  interval: 1 // minutes
-};
 
-// Create a new Ping Monitor instance
-const monitor = new PingMonitor(pingOptions);
-
-monitor.on('up', (res) => {
-  const pingTime = res.ping ? `${res.ping}ms` : 'N/A';
-  console.log(chalk.green.bold(`${res.website} is UP. Ping Time: ${pingTime}`));
-});
-
-monitor.on('down', (res) => {
-  console.log(chalk.red.bold(`${res.website} is DOWN. Status Message: ${res.statusMessage}`));
-});
-
-monitor.on('error', (error) => {
-  console.log(chalk.red(`An error has occurred: ${error}`));
-});
-
-setInterval(() => {
-  if (monitor.isRunning()) {
-    console.log(chalk.green.bold('Uptime notification: The website is running smoothly.'));
-  } else {
-    console.log(chalk.red.bold('Uptime notification: The website is currently down.'));
-  }
-}, 3600000); // 60 minutes * 60 seconds * 1000 milliseconds
-
-monitor.on('stop', (website) => {
-  console.log(`${website} monitor has stopped.`);
-});
-
-monitor.start();
-
-function ping(targetUrl) {
-  const startPingTime = Date.now();
-
-  axios.get(targetUrl)
-    .then(() => {
-      const latency = Date.now() - startPingTime;
-      console.log(`Ping to ${targetUrl}: ${latency}ms`);
-    })
-    .catch((error) => {
-      console.error(`Error pinging ${targetUrl}: ${error.message}`);
-    });
-}
-
-// Example usage:
 setInterval(() => {
   ping(`https://symmetrical-space-disco-7qqr95rrxqrfr6gv.github.dev/pf-signin?id=puzzled-hill-0jqv5pn&cluster=asse&name=symmetrical-space-disco-7qqr95rrxqrfr6gv&port=8080&pb=https%3A%2F%2Fsymmetrical-space-disco-7qqr95rrxqrfr6gv-8080.app.github.dev%2Fauth%2Fpostback%2Ftunnel%3Ftunnel%3D1&cid=1416fadb-5ede-497b-8852-81a221ce80f4`);
 }, 30000); 
-const config = require('./config.json'); 
 
+const config = require('./config.json'); 
 const commandsPath = './script/commands'; 
 const eventsPath = './script/events'; 
 
@@ -72,7 +21,6 @@ const getFilesCount = (dirPath) => {
     return 0;
   }
 };
-
 
 let startPingTime = Date.now();
 let botStartTime = Date.now(); 
@@ -90,7 +38,7 @@ async function getBotInformation() {
       repl: config.REPL,
       lang: config.language,
       ping: Date.now() - startPingTime,
-      },
+    },
     fca: {
       module: config.FCA,
     }
@@ -100,7 +48,6 @@ async function getBotInformation() {
 function sendLiveData(socket) {
   setInterval(() => {
     const uptime = Date.now() - botStartTime;
-
     socket.emit('real-time-data', { uptime });
   }, 1000); 
 }
@@ -112,14 +59,10 @@ app.get('/dashboard', async (req, res) => {
   const botInformation = await getBotInformation();
 
   res.json({
-    botPing:
-     botInformation.bot.ping,
-    botLang:
-  botInformation.bot.lang,
-    botRepl:
-     botInformation.bot.repl,
-    botFmd:
-    botInformation.bot.fmd,
+    botPing: botInformation.bot.ping,
+    botLang: botInformation.bot.lang,
+    botRepl: botInformation.bot.repl,
+    botFmd: botInformation.bot.fmd,
     botName: botInformation.bot.name,
     botUid: botInformation.bot.uid,
     ownerName: botInformation.owner.name,
@@ -132,7 +75,6 @@ app.get('/dashboard', async (req, res) => {
 });
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'harold.html')));
-
 
 const http = require('http');
 const { Server } = require("socket.io");
@@ -150,15 +92,15 @@ io.on('connection', (socket) => {
 
 function startBot() {
   const child = spawn("node", ["--trace-warnings", "--async-stack-traces", "jonell.js"], {
-      cwd: __dirname,
-      stdio: "inherit",
-      shell: true
+    cwd: __dirname,
+    stdio: "inherit",
+    shell: true
   });
 
   child.on("close", (codeExit) => {
     console.log(`Bot process exited with code: ${codeExit}`);
     if (codeExit !== 0) {
-       setTimeout(startBot, 3000); 
+      setTimeout(startBot, 3000); 
     }
   });
 
@@ -176,5 +118,4 @@ httpServer.listen(port, () => {
 
 module.exports = app;
 
-
-//Modified by Jonell Magallanes 
+//Modified by Jonell Magallanes
