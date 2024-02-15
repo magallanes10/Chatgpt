@@ -1,105 +1,84 @@
-const express = require('express');
-const fs = require('fs');
 const { spawn } = require("child_process");
-const chalk = require('chalk');
-const path = require('path');
+const { readFileSync } = require("fs-extra");
+/////////////////////////////////////////////
+//========= CHECK UPTIME =========//
+/////////////////////////////////////////////
+const http = require("http");
 const axios = require("axios");
+const semver = require("semver");
+const logger = require("./utils/log");
+const chalk = require("chalk");
+var uptimelink = [`https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`]
+const Monitor = require('ping-monitor');
+for (const now of uptimelink) {
+  const monitor = new Monitor({
+    website: `${now}`,
+    title: 'Yumi',
+    interval: 59,
+  config: {
+    intervalUnits: 'seconds'
+  }
+});
+monitor.on('up', (res) => console.log(chalk.bold.hex("#00FF00")("[ Yumi ] ❯ ") + chalk.hex("#00FF00")(`${res.website}`)))
+monitor.on('down', (res) => console.log(chalk.bold.hex("#FF0000")("[ DOWN ] ❯ ") + chalk.hex("#FF0000")(`${res.website} ${res.statusMessage}`)))
+monitor.on('stop', (website) => console.log(chalk.bold.hex("#FF0000")("[ STOP ] ❯ ") + chalk.hex("#FF0000")(`${website}`)))
+monitor.on('error', (error) => console.log(chalk.bold.hex("#FF0000")("[ ERROR ] ❯ ") + chalk.hex("#FF0000")(`${error}`)))
+}
+/////////////////////////////////////////////
+//========= Check node.js version =========//
+/////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////
+//========= Create website for dashboard/uptime =========//
+///////////////////////////////////////////////////////////
+
+const express = require('express');
 const app = express();
 
-const config = require('./config.json'); 
-const commandsPath = './script/commands'; 
-const eventsPath = './script/events'; 
+const port = process.env.PORT || 5000
+     
+app.listen(port, () =>
+	logger(`Your app is listening a http://localhost:${port}`, "[ ONLINE ]")
+     );      
 
-const getFilesCount = (dirPath) => {
-  try {
-    return fs.readdirSync(dirPath).length;
-  } catch (e) {
-    return 0;
-  }
-};
 
-let startPingTime = Date.now();
-let botStartTime = Date.now(); 
+logger("Opened server site...", "[ Starting ]");
 
-async function getBotInformation() {
-  return {
-    owner: {
-      name: config.BOTOWNER,
-      uid: config.ADMINUID,
-    },
-    bot: {
-      name: config.BOTNAME,
-      uid: config.ADMINUID,
-      fmd: config.FCA,
-      repl: config.REPL,
-      lang: config.language,
-      ping: Date.now() - startPingTime,
-    },
-    fca: {
-      module: config.FCA,
-    }
-  };
-}
+/////////////////////////////////////////////////////////
+//========= Create start bot and make it loop =========//
+/////////////////////////////////////////////////////////
 
-function sendLiveData() {
-  setInterval(() => {
-    const uptime = Date.now() - botStartTime;
-    // Modify or use your own logic for real-time data updates
-  }, 1000); 
-}
+function startBot(message) {
+    (message) ? logger(message, "[ Starting ]") : "";
 
-app.get('/dashboard', async (req, res) => {
-  const commandsCount = getFilesCount(commandsPath);
-  const eventsCount = getFilesCount(eventsPath);
-  const uptime = Date.now() - botStartTime;
-  const botInformation = await getBotInformation();
-
-  res.json({
-    botPing: botInformation.bot.ping,
-    botLang: botInformation.bot.lang,
-    botRepl: botInformation.bot.repl,
-    botFmd: botInformation.bot.fmd,
-    botName: botInformation.bot.name,
-    botUid: botInformation.bot.uid,
-    ownerName: botInformation.owner.name,
-    ownerUid: botInformation.owner.uid,
-    prefix: config.PREFIX,
-    commandsCount: commandsCount,
-    eventsCount: eventsCount,
-    uptime: uptime
-  });
-});
-
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'harold.html')));
-
-function startBot() {
-  const child = spawn("node", ["--trace-warnings", "--async-stack-traces", "jonell.js"], {
-    cwd: __dirname,
-    stdio: "inherit",
-    shell: true
-  });
-
+    const child = spawn("node", ["--trace-warnings", "--async-stack-traces", "jonell.js"], {
+        cwd: __dirname,
+        stdio: "inherit",
+        shell: true
+    });
+  
   child.on("close", (codeExit) => {
-    console.log(`Bot process exited with code: ${codeExit}`);
-    if (codeExit !== 0) {
-      setTimeout(startBot, 3000); 
-    }
+        if (codeExit != 0 || global.countRestart && global.countRestart < 5) {
+            startBot("Starting up...");
+            global.countRestart += 1;
+            return;
+        } else return;
+    });
+
+  child.on("error", function(error) {
+    logger("An error occurred: " + JSON.stringify(error), "[ Starting ]");
   });
+};
+////////////////////////////////////////////////
+//========= Check update from Github =========//
+////////////////////////////////////////////////
 
-  child.on("error", (error) => {
-    console.error(`An error occurred starting the bot: ${error}`);
-  });
-}
 
-sendLiveData();  // Call the function to start sending live data
-
-startBot(); 
-
-const port = process.env.PORT || 5050;
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+axios.get("https://raw.githubusercontent.com/Huongcq98/miraiv3/3aa476e7079e45d219697bdc4e3c2e1a8cf33314/package.json").then((res) => {
+  logger(res['data']['name'], "[ NAME ]");
+  logger("Version: " + res['data']['version'], "[ VERSION ]");
+  logger(res['data']['description'], "[ DESCRIPTION ]");
 });
-
-module.exports = app;
-
-// Modified by Jonell Magallanes
+startBot();
+// THIS BOT WAS MADE BY Arjhil Dacayanan - DO NOT STEAL MY CODE.
+app.get('/', (req, res) => res.sendFile(__dirname+'/Harold.html'))
